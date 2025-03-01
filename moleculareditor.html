@@ -378,7 +378,7 @@
       'Y': { symbol: 'Y', name: 'Ittrio', number: 39, color: '#64B5F6', valence: 3 },
       'Zr': { symbol: 'Zr', name: 'Zirconio', number: 40, color: '#64B5F6', valence: 4 },
       'Nb': { symbol: 'Nb', name: 'Niobio', number: 41, color: '#64B5F6', valence: 5 },
-      'Mo': { symbol: 'Mo', name: 'Molibdeno', number: 42, color: '#64B5F6', valence: 6 },
+            'Mo': { symbol: 'Mo', name: 'Molibdeno', number: 42, color: '#64B5F6', valence: 6 },
       'Tc': { symbol: 'Tc', name: 'Tecnezio', number: 43, color: '#64B5F6', valence: 7 },
       'Ru': { symbol: 'Ru', name: 'Rutenio', number: 44, color: '#64B5F6', valence: 6 },
       'Rh': { symbol: 'Rh', name: 'Rodio', number: 45, color: '#64B5F6', valence: 3 },
@@ -804,148 +804,148 @@
     // Ridisegna la canvas
     function redraw() {
       drawGrid();
-      
-      // Disegna i legami
-      state.bonds.forEach(bond => {
-        drawBond(bond);
-      });
-      
-      // Disegna gli atomi
-      state.atoms.forEach(atom => {
-        drawAtom(atom);
-      });
-    }
+
+        // Disegna i legami
+    state.bonds.forEach(bond => {
+      drawBond(bond);
+    });
     
-    // Disegna un atomo
-    function drawAtom(atom) {
-      const element = ELEMENTS[atom.element];
-      const radius = 15;
-      
-      // Disegna il cerchio
-      ctx.beginPath();
-      ctx.arc(atom.x, atom.y, radius, 0, Math.PI * 2);
-      ctx.fillStyle = element.color;
-      ctx.fill();
-      
-      // Disegna il simbolo dell'elemento
-      ctx.fillStyle = 'white';
-      ctx.font = 'bold 14px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(atom.element, atom.x, atom.y);
-    }
+    // Disegna gli atomi
+    state.atoms.forEach(atom => {
+      drawAtom(atom);
+    });
+  }
+  
+  // Disegna un atomo
+  function drawAtom(atom) {
+    const element = ELEMENTS[atom.element];
+    const radius = 15;
     
-    // Disegna un legame
-    function drawBond(bond) {
-      const { atom1, atom2, type } = bond;
-      
-      ctx.beginPath();
-      
-      if (type === 'single') {
-        drawSingleBond(atom1, atom2);
-      } else if (type === 'double') {
-        drawDoubleBond(atom1, atom2);
-      } else if (type === 'triple') {
-        drawTripleBond(atom1, atom2);
-      }
-    }
+    // Disegna il cerchio
+    ctx.beginPath();
+    ctx.arc(atom.x, atom.y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = element.color;
+    ctx.fill();
     
-    // Disegna un legame singolo
-    function drawSingleBond(atom1, atom2) {
-      ctx.beginPath();
-      ctx.moveTo(atom1.x, atom1.y);
-      ctx.lineTo(atom2.x, atom2.y);
-      ctx.strokeStyle = '#4a5568';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
+    // Disegna il simbolo dell'elemento
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(atom.element, atom.x, atom.y);
+  }
+  
+  // Disegna un legame
+  function drawBond(bond) {
+    const { atom1, atom2, type } = bond;
     
-    // Disegna un legame doppio
-    function drawDoubleBond(atom1, atom2) {
-      const dx = atom2.x - atom1.x;
-      const dy = atom2.y - atom1.y;
-      const length = Math.sqrt(dx * dx + dy * dy);
-      
-      // Normalizza il vettore direzione
-      const nx = dx / length;
-      const ny = dy / length;
-      
-      // Vettore perpendicolare
-      const px = -ny;
-      const py = nx;
-      
-      // Offset per le linee parallele
-      const offset = 3;
-      
-      // Prima linea
-      ctx.beginPath();
-      ctx.moveTo(atom1.x + px * offset, atom1.y + py * offset);
-      ctx.lineTo(atom2.x + px * offset, atom2.y + py * offset);
-      ctx.strokeStyle = '#4a5568';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      // Seconda linea
-      ctx.beginPath();
-      ctx.moveTo(atom1.x - px * offset, atom1.y - py * offset);
-      ctx.lineTo(atom2.x - px * offset, atom2.y - py * offset);
-      ctx.stroke();
-    }
+    ctx.beginPath();
     
-    // Disegna un legame triplo
-    function drawTripleBond(atom1, atom2) {
-      const dx = atom2.x - atom1.x;
-      const dy = atom2.y - atom1.y;
-      const length = Math.sqrt(dx * dx + dy * dy);
-      
-      // Normalizza il vettore direzione
-      const nx = dx / length;
-      const ny = dy / length;
-      
-      // Vettore perpendicolare
-      const px = -ny;
-      const py = nx;
-      
-      // Offset per le linee parallele
-      const offset = 5;
-      
-      // Prima linea
-      ctx.beginPath();
-      ctx.moveTo(atom1.x + px * offset, atom1.y + py * offset);
-      ctx.lineTo(atom2.x + px * offset, atom2.y + py * offset);
-      ctx.strokeStyle = '#4a5568';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      // Seconda linea (centrale)
-      ctx.beginPath();
-      ctx.moveTo(atom1.x, atom1.y);
-      ctx.lineTo(atom2.x, atom2.y);
-      ctx.stroke();
-      
-      // Terza linea
-      ctx.beginPath();
-      ctx.moveTo(atom1.x - px * offset, atom1.y - py * offset);
-      ctx.lineTo(atom2.x - px * offset, atom2.y - py * offset);
-      ctx.stroke();
+    if (type === 'single') {
+      drawSingleBond(atom1, atom2);
+    } else if (type === 'double') {
+      drawDoubleBond(atom1, atom2);
+    } else if (type === 'triple') {
+      drawTripleBond(atom1, atom2);
     }
+  }
+  
+  // Disegna un legame singolo
+  function drawSingleBond(atom1, atom2) {
+    ctx.beginPath();
+    ctx.moveTo(atom1.x, atom1.y);
+    ctx.lineTo(atom2.x, atom2.y);
+    ctx.strokeStyle = '#4a5568';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  
+  // Disegna un legame doppio
+  function drawDoubleBond(atom1, atom2) {
+    const dx = atom2.x - atom1.x;
+    const dy = atom2.y - atom1.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
     
-    // Esporta la molecola in formato SMILES
-    function exportSMILES() {
-      // Implementazione semplificata per l'esempio
-      alert('Funzionalità di esportazione SMILES da implementare');
-      // In una versione completa, qui andrebbe implementato un algoritmo SMILES
-    }
+    // Normalizza il vettore direzione
+    const nx = dx / length;
+    const ny = dy / length;
     
-    // Cancella la canvas
-    function clearCanvas() {
-      state.atoms = [];
-      state.bonds = [];
-      redraw();
-    }
+    // Vettore perpendicolare
+    const px = -ny;
+    const py = nx;
     
-    // Inizializza l'applicazione
-    init();
+    // Offset per le linee parallele
+    const offset = 3;
+    
+    // Prima linea
+    ctx.beginPath();
+    ctx.moveTo(atom1.x + px * offset, atom1.y + py * offset);
+    ctx.lineTo(atom2.x + px * offset, atom2.y + py * offset);
+    ctx.strokeStyle = '#4a5568';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Seconda linea
+    ctx.beginPath();
+    ctx.moveTo(atom1.x - px * offset, atom1.y - py * offset);
+    ctx.lineTo(atom2.x - px * offset, atom2.y - py * offset);
+    ctx.stroke();
+  }
+  
+  // Disegna un legame triplo
+  function drawTripleBond(atom1, atom2) {
+    const dx = atom2.x - atom1.x;
+    const dy = atom2.y - atom1.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    
+    // Normalizza il vettore direzione
+    const nx = dx / length;
+    const ny = dy / length;
+    
+    // Vettore perpendicolare
+    const px = -ny;
+    const py = nx;
+    
+    // Offset per le linee parallele
+    const offset = 5;
+    
+    // Prima linea
+    ctx.beginPath();
+    ctx.moveTo(atom1.x + px * offset, atom1.y + py * offset);
+    ctx.lineTo(atom2.x + px * offset, atom2.y + py * offset);
+    ctx.strokeStyle = '#4a5568';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Seconda linea (centrale)
+    ctx.beginPath();
+    ctx.moveTo(atom1.x, atom1.y);
+    ctx.lineTo(atom2.x, atom2.y);
+    ctx.stroke();
+    
+    // Terza linea
+    ctx.beginPath();
+    ctx.moveTo(atom1.x - px * offset, atom1.y - py * offset);
+    ctx.lineTo(atom2.x - px * offset, atom2.y - py * offset);
+    ctx.stroke();
+  }
+  
+  // Esporta la molecola in formato SMILES
+  function exportSMILES() {
+    // Implementazione semplificata per l'esempio
+    alert('Funzionalità di esportazione SMILES da implementare');
+    // In una versione completa, qui andrebbe implementato un algoritmo SMILES
+  }
+  
+  // Cancella la canvas
+  function clearCanvas() {
+    state.atoms = [];
+    state.bonds = [];
+    redraw();
+  }
+  
+  // Inizializza l'applicazione
+  init();
   </script>
 </body>
 </html>
