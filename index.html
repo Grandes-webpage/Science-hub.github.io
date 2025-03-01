@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang:"en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Science Hub Services</title>
+    <style>
+      h1{
+        text-align: center;
+      }
+      body{
+        font-family: TimesNewRoman, Times, serif;
+        font-style: italic;
+        color: white;
+        background-color: black;
+      }
+      .link-to-services{
+        display: flex;/*display: flex;: Imposta il contenitore come un contenitore flessibile (flexbox), che consente di disporre gli elementi figli in modo flessibile.*/
+        justify-content: center;/*justify-content: center;: Centra orizzontalmente tutti gli elementi figli all'interno del contenitore flessibile.*/
+        flex-wrap: wrap;/*flex-wrap: wrap;: Permette agli elementi figli di andare a capo se non c'è abbastanza spazio in una singola riga.*/
+        gap: 20px;/*gap: 10px;: Imposta uno spazio di 10px tra gli elementi figli.*/
+        margin: 20px 0;/*margin: 15px 0;: Aggiunge un margine di 15px sopra e sotto il contenitore.*/
+      }
+      .link-to-services button {
+        padding: 8px 15px;/* padding: 8px 15px;: Aggiunge uno spazio interno di 8px sopra e sotto e 15px a destra e sinistra dell'elemento. */
+        background-color: blue;
+        color: white;
+        border: solid;/* border: solid;: Mostra i bordi dell'elemento, border: none;: Rimuove qualsiasi bordo dall'elemento.*/
+        border-radius: 8px;/* border-radius: 8px;: Arrotonda gli angoli dell'elemento con un raggio di 8px. */
+        cursor: pointer;/* cursor: pointer;: Cambia il cursore a una mano (pointer) quando si passa sopra l'elemento, indicando che è cliccabile. */
+        transition: background-color 0.3s;/* transition: background-color 0.3s;: Aggiunge una transizione fluida di 0.3 secondi per il cambiamento del colore di sfondo.*/
+      }
+      .link-to-services button:hover {
+        background-color: darkblue;/* .link-to-services button:hover { background-color: darkblue; }: Questo comando cambia il colore di sfondo del bottone all'interno del contenitore .link-to-services a "blu scuro" quando l'utente passa il cursore del mouse sopra il bottone (:hover). */
+      }
+    </style>
+  </head>
+  <body>
+    <h1>What service do you need?</h1><br>
+    <div class="link-to-services">
+      <button onclick="location.href='  '">Specific Unit Converter (SUC)</button>
+      <button onclick="location.href='  '">Other Is Coming Soon</button>
+      <button onclick="location.href='  '">Other Is Coming Soon</button>
+      <button onclick="location.href='  '">Other Is Coming Soon</button>
+    </div>
+    
+  </body>
