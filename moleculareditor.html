@@ -378,4 +378,574 @@
       'Y': { symbol: 'Y', name: 'Ittrio', number: 39, color: '#64B5F6', valence: 3 },
       'Zr': { symbol: 'Zr', name: 'Zirconio', number: 40, color: '#64B5F6', valence: 4 },
       'Nb': { symbol: 'Nb', name: 'Niobio', number: 41, color: '#64B5F6', valence: 5 },
-      'Mo': { symbol: 'Mo', name: 'Molibdeno', number: 42, color: '#64B5F6', valence:
+      'Mo': { symbol: 'Mo', name: 'Molibdeno', number: 42, color: '#64B5F6', valence: 6 },
+      'Tc': { symbol: 'Tc', name: 'Tecnezio', number: 43, color: '#64B5F6', valence: 7 },
+      'Ru': { symbol: 'Ru', name: 'Rutenio', number: 44, color: '#64B5F6', valence: 6 },
+      'Rh': { symbol: 'Rh', name: 'Rodio', number: 45, color: '#64B5F6', valence: 3 },
+      'Pd': { symbol: 'Pd', name: 'Palladio', number: 46, color: '#64B5F6', valence: 2 },
+      'Ag': { symbol: 'Ag', name: 'Argento', number: 47, color: '#64B5F6', valence: 1 },
+      'Cd': { symbol: 'Cd', name: 'Cadmio', number: 48, color: '#64B5F6', valence: 2 }
+    };
+
+    // Definizione delle variabili globali
+    const canvas = document.getElementById('molecularCanvas');
+    const ctx = canvas.getContext('2d');
+    const atomTool = document.getElementById('atomTool');
+    const bondTool = document.getElementById('bondTool');
+    const eraserTool = document.getElementById('eraserTool');
+    const atomSelect = document.getElementById('atomSelect');
+    const bondSelect = document.getElementById('bondSelect');
+    const exportBtn = document.getElementById('exportBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const gridToggle = document.getElementById('gridToggle');
+    const elementPicker = document.getElementById('elementPicker');
+    const closeElementPicker = document.getElementById('closeElementPicker');
+    const periodicTable = document.getElementById('periodicTable');
+
+    // Stato dell'applicazione
+    const state = {
+      tool: 'atom', // 'atom', 'bond', 'eraser'
+      selectedAtom: 'C',
+      selectedBond: 'single',
+      gridType: 'square', // 'square', 'hexagonal'
+      atoms: [], // Array di atomi {x, y, element}
+      bonds: [], // Array di legami {atom1, atom2, type}
+      gridSize: 30, // Dimensione della griglia in pixel
+      isDragging: false,
+      startAtom: null, // Per la creazione di legami
+    };
+
+    // Inizializzazione dell'applicazione
+    function init() {
+      // Popola la tavola periodica
+      populatePeriodicTable();
+      
+      // Aggiungi event listeners per i controlli
+      addEventListeners();
+      
+      // Disegna la griglia iniziale
+      drawGrid();
+    }
+
+    // Popola la tavola periodica con gli elementi
+    function populatePeriodicTable() {
+      // Clear previous content
+      periodicTable.innerHTML = '';
+      
+      // Mappa di posizioni per gli elementi nella tavola periodica
+      const positions = [
+        // Primo periodo
+        [0, 0], [17, 0],
+        // Secondo periodo
+        [0, 1], [1, 1], [12, 1], [13, 1], [14, 1], [15, 1], [16, 1], [17, 1],
+        // Terzo periodo
+        [0, 2], [1, 2], [12, 2], [13, 2], [14, 2], [15, 2], [16, 2], [17, 2],
+        // Quarto periodo
+        [0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3], [8, 3], [9, 3], [10, 3], [11, 3], [12, 3], [13, 3], [14, 3], [15, 3], [16, 3], [17, 3],
+        // Quinto periodo
+        [0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4], [8, 4], [9, 4], [10, 4], [11, 4], [12, 4], [13, 4], [14, 4], [15, 4], [16, 4], [17, 4],
+        // Sesto periodo
+        [0, 5], [1, 5], [2, 5], [3, 5], [4, 5], [5, 5], [6, 5], [7, 5], [8, 5], [9, 5], [10, 5], [11, 5], [12, 5], [13, 5], [14, 5], [15, 5], [16, 5], [17, 5],
+        // Settimo periodo
+        [0, 6], [1, 6], [2, 6], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6], [8, 6], [9, 6], [10, 6], [11, 6], [12, 6], [13, 6], [14, 6], [15, 6], [16, 6], [17, 6]
+      ];
+      
+      // Crea un div vuoto per le posizioni vuote
+      const emptyDiv = document.createElement('div');
+      emptyDiv.style.width = '40px';
+      emptyDiv.style.height = '40px';
+      
+      // Posiziona gli elementi nella tavola periodica
+      for (let i = 0; i < 7; i++) {
+        for (let j = 0; j < 18; j++) {
+          const position = [j, i];
+          const elementSymbol = getElementAtPosition(position);
+          
+          if (elementSymbol) {
+            const element = ELEMENTS[elementSymbol];
+            const elementBtn = document.createElement('button');
+            elementBtn.className = 'element-btn';
+            elementBtn.style.backgroundColor = element.color + '30'; // Aggiungi trasparenza
+            elementBtn.style.borderColor = element.color;
+            
+            elementBtn.innerHTML = `
+              <span class="element-symbol">${element.symbol}</span>
+              <span class="element-number">${element.number}</span>
+            `;
+            
+            elementBtn.addEventListener('click', () => {
+              state.selectedAtom = element.symbol;
+              updateAtomSelect();
+              elementPicker.classList.remove('show');
+            });
+            
+            periodicTable.appendChild(elementBtn);
+          } else {
+            periodicTable.appendChild(emptyDiv.cloneNode(true));
+          }
+        }
+      }
+    }
+    
+    // Restituisce il simbolo dell'elemento alla posizione data
+    function getElementAtPosition(position) {
+      const [x, y] = position;
+      
+      // Mapping semplificato per alcuni elementi principali
+      if (y === 0) {
+        if (x === 0) return 'H';
+        if (x === 17) return 'He';
+      } else if (y === 1) {
+        if (x === 0) return 'Li';
+        if (x === 1) return 'Be';
+        if (x === 12) return 'B';
+        if (x === 13) return 'C';
+        if (x === 14) return 'N';
+        if (x === 15) return 'O';
+        if (x === 16) return 'F';
+        if (x === 17) return 'Ne';
+      } else if (y === 2) {
+        if (x === 0) return 'Na';
+        if (x === 1) return 'Mg';
+        if (x === 12) return 'Al';
+        if (x === 13) return 'Si';
+        if (x === 14) return 'P';
+        if (x === 15) return 'S';
+        if (x === 16) return 'Cl';
+        if (x === 17) return 'Ar';
+      }
+      
+      // Per semplicità, restituisci solo gli elementi più comuni per la chimica organica
+      return null;
+    }
+    
+    // Aggiunge gli event listeners per i controlli dell'interfaccia
+    function addEventListeners() {
+      // Strumenti
+      atomTool.addEventListener('click', () => {
+        setTool('atom');
+      });
+      
+      bondTool.addEventListener('click', () => {
+        setTool('bond');
+      });
+      
+      eraserTool.addEventListener('click', () => {
+        setTool('eraser');
+      });
+      
+      // Selettori
+      atomSelect.addEventListener('change', () => {
+        if (atomSelect.value === 'more') {
+          elementPicker.classList.add('show');
+        } else {
+          state.selectedAtom = atomSelect.value;
+        }
+      });
+      
+      bondSelect.addEventListener('change', () => {
+        state.selectedBond = bondSelect.value;
+      });
+      
+      // Altro
+      closeElementPicker.addEventListener('click', () => {
+        elementPicker.classList.remove('show');
+      });
+      
+      exportBtn.addEventListener('click', exportSMILES);
+      
+      clearBtn.addEventListener('click', clearCanvas);
+      
+      gridToggle.addEventListener('change', () => {
+        state.gridType = gridToggle.checked ? 'hexagonal' : 'square';
+        drawGrid();
+        redraw();
+      });
+      
+      // Canvas events
+      canvas.addEventListener('mousedown', handleCanvasMouseDown);
+      canvas.addEventListener('mousemove', handleCanvasMouseMove);
+      canvas.addEventListener('mouseup', handleCanvasMouseUp);
+    }
+    
+    // Imposta lo strumento attivo
+    function setTool(tool) {
+      state.tool = tool;
+      
+      // Aggiorna l'aspetto dei pulsanti
+      atomTool.className = tool === 'atom' ? 'btn btn-primary' : 'btn btn-outline';
+      bondTool.className = tool === 'bond' ? 'btn btn-primary' : 'btn btn-outline';
+      eraserTool.className = tool === 'eraser' ? 'btn btn-primary' : 'btn btn-outline';
+    }
+    
+    // Aggiorna il selettore degli atomi
+    function updateAtomSelect() {
+      // Se l'elemento selezionato è nelle opzioni, selezionalo
+      for (let i = 0; i < atomSelect.options.length; i++) {
+        if (atomSelect.options[i].value === state.selectedAtom) {
+          atomSelect.selectedIndex = i;
+          return;
+        }
+      }
+      
+      // Altrimenti, mostra "Più elementi..."
+      atomSelect.value = 'more';
+    }
+    
+    // Disegna la griglia
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Stile della griglia
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 0.5;
+      
+      if (state.gridType === 'square') {
+        drawSquareGrid();
+      } else {
+        drawHexagonalGrid();
+      }
+    }
+    
+    // Disegna una griglia quadrata
+    function drawSquareGrid() {
+      const { gridSize } = state;
+      
+      // Linee verticali
+      for (let x = 0; x <= canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      
+      // Linee orizzontali
+      for (let y = 0; y <= canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
+    
+    // Disegna una griglia esagonale
+    function drawHexagonalGrid() {
+      const { gridSize } = state;
+      const hexHeight = gridSize * Math.sqrt(3);
+      
+      // Calcola il numero di esagoni da disegnare
+      const numCols = Math.ceil(canvas.width / (gridSize * 1.5)) + 1;
+      const numRows = Math.ceil(canvas.height / hexHeight) + 1;
+      
+      for (let row = 0; row < numRows; row++) {
+        for (let col = 0; col < numCols; col++) {
+          const x = col * gridSize * 1.5;
+          const y = row * hexHeight + (col % 2 === 1 ? hexHeight / 2 : 0);
+          
+          drawHexagon(x, y, gridSize / 2);
+        }
+      }
+    }
+    
+    // Disegna un esagono
+    function drawHexagon(x, y, size) {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = Math.PI / 3 * i;
+        const px = x + size * Math.cos(angle);
+        const py = y + size * Math.sin(angle);
+        
+        if (i === 0) {
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.closePath();
+      ctx.stroke();
+    }
+    
+    // Gestione degli eventi del mouse sulla canvas
+    function handleCanvasMouseDown(e) {
+      const { offsetX, offsetY } = e;
+      
+      if (state.tool === 'atom') {
+        addAtom(offsetX, offsetY);
+      } else if (state.tool === 'bond') {
+        state.isDragging = true;
+        state.startAtom = findAtomNear(offsetX, offsetY);
+      } else if (state.tool === 'eraser') {
+        eraseAt(offsetX, offsetY);
+      }
+    }
+    
+    function handleCanvasMouseMove(e) {
+      if (!state.isDragging || state.tool !== 'bond' || !state.startAtom) return;
+      
+      redraw();
+      
+      // Disegna una linea provvisoria
+      ctx.beginPath();
+      ctx.moveTo(state.startAtom.x, state.startAtom.y);
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.strokeStyle = '#4299e1';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    
+    function handleCanvasMouseUp(e) {
+      if (state.isDragging && state.tool === 'bond' && state.startAtom) {
+        const endAtom = findAtomNear(e.offsetX, e.offsetY);
+        
+        if (endAtom && endAtom !== state.startAtom) {
+          addBond(state.startAtom, endAtom);
+        }
+      }
+      
+      state.isDragging = false;
+      state.startAtom = null;
+      
+      redraw();
+    }
+    
+    // Aggiungi un atomo alla posizione più vicina sulla griglia
+    function addAtom(x, y) {
+      const position = snapToGrid(x, y);
+      
+      // Controlla se esiste già un atomo in questa posizione
+      const existingAtom = findAtomAt(position.x, position.y);
+      if (existingAtom) {
+        existingAtom.element = state.selectedAtom;
+      } else {
+        state.atoms.push({
+          x: position.x,
+          y: position.y,
+          element: state.selectedAtom
+        });
+      }
+      
+      redraw();
+    }
+    
+    // Aggiungi un legame tra due atomi
+    function addBond(atom1, atom2) {
+      // Controlla se esiste già un legame tra questi atomi
+      const existingBond = state.bonds.find(bond => 
+        (bond.atom1 === atom1 && bond.atom2 === atom2) ||
+        (bond.atom1 === atom2 && bond.atom2 === atom1)
+      );
+      
+      if (existingBond) {
+        existingBond.type = state.selectedBond;
+      } else {
+        state.bonds.push({
+          atom1,
+          atom2,
+          type: state.selectedBond
+        });
+      }
+      
+      redraw();
+    }
+    
+    // Rimuovi atomi e legami nella posizione
+    function eraseAt(x, y) {
+      // Trova l'atomo più vicino
+      const atom = findAtomNear(x, y);
+      
+      if (atom) {
+        // Rimuovi l'atomo
+        state.atoms = state.atoms.filter(a => a !== atom);
+        
+        // Rimuovi i legami collegati a questo atomo
+        state.bonds = state.bonds.filter(bond => 
+          bond.atom1 !== atom && bond.atom2 !== atom
+        );
+        
+        redraw();
+      }
+    }
+    
+    // Trova l'atomo esattamente alla posizione specificata
+    function findAtomAt(x, y) {
+      return state.atoms.find(atom => 
+        atom.x === x && atom.y === y
+      );
+    }
+    
+    // Trova l'atomo più vicino alla posizione specificata
+    function findAtomNear(x, y, threshold = 15) {
+      return state.atoms.find(atom => 
+        Math.sqrt(Math.pow(atom.x - x, 2) + Math.pow(atom.y - y, 2)) < threshold
+      );
+    }
+    
+    // Snappa una posizione alla griglia
+    function snapToGrid(x, y) {
+      if (state.gridType === 'square') {
+        return {
+          x: Math.round(x / state.gridSize) * state.gridSize,
+          y: Math.round(y / state.gridSize) * state.gridSize
+        };
+      } else {
+        // Per la griglia esagonale, è più complesso
+        // Implementazione semplificata
+        const hexHeight = state.gridSize * Math.sqrt(3);
+        const col = Math.round(x / (state.gridSize * 1.5));
+        let row = Math.round((y - (col % 2 === 1 ? hexHeight / 2 : 0)) / hexHeight);
+        
+        return {
+          x: col * state.gridSize * 1.5,
+          y: row * hexHeight + (col % 2 === 1 ? hexHeight / 2 : 0)
+        };
+      }
+    }
+    
+    // Ridisegna la canvas
+    function redraw() {
+      drawGrid();
+      
+      // Disegna i legami
+      state.bonds.forEach(bond => {
+        drawBond(bond);
+      });
+      
+      // Disegna gli atomi
+      state.atoms.forEach(atom => {
+        drawAtom(atom);
+      });
+    }
+    
+    // Disegna un atomo
+    function drawAtom(atom) {
+      const element = ELEMENTS[atom.element];
+      const radius = 15;
+      
+      // Disegna il cerchio
+      ctx.beginPath();
+      ctx.arc(atom.x, atom.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = element.color;
+      ctx.fill();
+      
+      // Disegna il simbolo dell'elemento
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(atom.element, atom.x, atom.y);
+    }
+    
+    // Disegna un legame
+    function drawBond(bond) {
+      const { atom1, atom2, type } = bond;
+      
+      ctx.beginPath();
+      
+      if (type === 'single') {
+        drawSingleBond(atom1, atom2);
+      } else if (type === 'double') {
+        drawDoubleBond(atom1, atom2);
+      } else if (type === 'triple') {
+        drawTripleBond(atom1, atom2);
+      }
+    }
+    
+    // Disegna un legame singolo
+    function drawSingleBond(atom1, atom2) {
+      ctx.beginPath();
+      ctx.moveTo(atom1.x, atom1.y);
+      ctx.lineTo(atom2.x, atom2.y);
+      ctx.strokeStyle = '#4a5568';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    
+    // Disegna un legame doppio
+    function drawDoubleBond(atom1, atom2) {
+      const dx = atom2.x - atom1.x;
+      const dy = atom2.y - atom1.y;
+      const length = Math.sqrt(dx * dx + dy * dy);
+      
+      // Normalizza il vettore direzione
+      const nx = dx / length;
+      const ny = dy / length;
+      
+      // Vettore perpendicolare
+      const px = -ny;
+      const py = nx;
+      
+      // Offset per le linee parallele
+      const offset = 3;
+      
+      // Prima linea
+      ctx.beginPath();
+      ctx.moveTo(atom1.x + px * offset, atom1.y + py * offset);
+      ctx.lineTo(atom2.x + px * offset, atom2.y + py * offset);
+      ctx.strokeStyle = '#4a5568';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Seconda linea
+      ctx.beginPath();
+      ctx.moveTo(atom1.x - px * offset, atom1.y - py * offset);
+      ctx.lineTo(atom2.x - px * offset, atom2.y - py * offset);
+      ctx.stroke();
+    }
+    
+    // Disegna un legame triplo
+    function drawTripleBond(atom1, atom2) {
+      const dx = atom2.x - atom1.x;
+      const dy = atom2.y - atom1.y;
+      const length = Math.sqrt(dx * dx + dy * dy);
+      
+      // Normalizza il vettore direzione
+      const nx = dx / length;
+      const ny = dy / length;
+      
+      // Vettore perpendicolare
+      const px = -ny;
+      const py = nx;
+      
+      // Offset per le linee parallele
+      const offset = 5;
+      
+      // Prima linea
+      ctx.beginPath();
+      ctx.moveTo(atom1.x + px * offset, atom1.y + py * offset);
+      ctx.lineTo(atom2.x + px * offset, atom2.y + py * offset);
+      ctx.strokeStyle = '#4a5568';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Seconda linea (centrale)
+      ctx.beginPath();
+      ctx.moveTo(atom1.x, atom1.y);
+      ctx.lineTo(atom2.x, atom2.y);
+      ctx.stroke();
+      
+      // Terza linea
+      ctx.beginPath();
+      ctx.moveTo(atom1.x - px * offset, atom1.y - py * offset);
+      ctx.lineTo(atom2.x - px * offset, atom2.y - py * offset);
+      ctx.stroke();
+    }
+    
+    // Esporta la molecola in formato SMILES
+    function exportSMILES() {
+      // Implementazione semplificata per l'esempio
+      alert('Funzionalità di esportazione SMILES da implementare');
+      // In una versione completa, qui andrebbe implementato un algoritmo SMILES
+    }
+    
+    // Cancella la canvas
+    function clearCanvas() {
+      state.atoms = [];
+      state.bonds = [];
+      redraw();
+    }
+    
+    // Inizializza l'applicazione
+    init();
+  </script>
+</body>
+</html>
