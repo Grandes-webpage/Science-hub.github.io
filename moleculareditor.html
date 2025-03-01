@@ -426,7 +426,7 @@
       // Disegna la griglia iniziale
       drawGrid();
     }
-    function populatePeriodicTable() {
+   function populatePeriodicTable() {
   periodicTable.innerHTML = '';
 
   const positions = [
@@ -447,23 +447,25 @@
 
       if (elementSymbol) {
         const element = ELEMENTS[elementSymbol];
-        const elementBtn = document.createElement('button');
-        elementBtn.className = 'element-btn';
-        elementBtn.style.backgroundColor = element.color + '30';
-        elementBtn.style.borderColor = element.color;
+        if (element) {
+          const elementBtn = document.createElement('button');
+          elementBtn.className = 'element-btn';
+          elementBtn.style.backgroundColor = element.color + '30';
+          elementBtn.style.borderColor = element.color;
 
-        elementBtn.innerHTML = `
-          <span class="element-symbol">${element.symbol}</span>
-          <span class="element-number">${element.number}</span>
-        `;
+          elementBtn.innerHTML = `
+            <span class="element-symbol">${element.symbol}</span>
+            <span class="element-number">${element.number}</span>
+          `;
 
-        elementBtn.addEventListener('click', () => {
-          state.selectedAtom = element.symbol;
-          updateAtomSelect();
-          elementPicker.classList.remove('show');
-        });
+          elementBtn.addEventListener('click', () => {
+            state.selectedAtom = element.symbol;
+            updateAtomSelect();
+            elementPicker.classList.remove('show');
+          });
 
-        periodicTable.appendChild(elementBtn);
+          periodicTable.appendChild(elementBtn);
+        }
       } else {
         periodicTable.appendChild(emptyDiv.cloneNode(true));
       }
