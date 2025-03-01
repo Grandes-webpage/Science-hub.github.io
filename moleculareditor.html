@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor Molecolare Avanzato</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #f9fafb;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-width: 880px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-title {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1a202c;
+    }
+    
+    .card-content {
+      padding: 24px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background-color: #4299e1;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #3182ce;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border-color: #e2e8f0;
+      color: #4a5568;
+    }
+    
+    .btn-outline:hover {
+      background-color: #f7fafc;
+    }
+    
+    .btn-danger {
+      background-color: #f56565;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: #e53e3e;
+    }
+    
+    .select-container {
+      position: relative;
+    }
+    
+    .select {
+      appearance: none;
+      background-color: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 8px 32px 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      min-width: 100px;
+    }
+    
+    .select-container::after {
+      content: "▼";
+      font-size: 12px;
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: #4a5568;
+    }
+    
+    canvas {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background-color: white;
+      display: block;
+    }
+    
+    .element-picker {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      padding: 20px;
+      max-width: 800px;
+      max-height: 70vh;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+    
+    .element-picker.show {
+      display: block;
+    }
+    
+    .element-picker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .element-picker-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #4a5568;
+    }
+    
+    .periodic-table {
+      display: grid;
+      grid-template-columns: repeat(18, 1fr);
+      gap: 4px;
+    }
+    
+    .element-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      background-color: white;
+      transition: all 0.2s;
+    }
+    
+    .element-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .element-symbol {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .element-number {
+      font-size: 10px;
+      color: #718096;
+    }
+    
+    .grid-toggle {
+      margin-left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .grid-label {
+      font-size: 14px;
+      color: #4a5568;
+    }
+    
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e0;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: #4299e1;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Editor Molecolare Avanzato</h2>
+      <div class="grid-toggle">
+        <span class="grid-label">Griglia quadrata</span>
+        <label class="switch">
+          <input type="checkbox" id="gridToggle">
+          <span class="slider"></span>
+        </label>
+        <span class="grid-label">Griglia esagonale</span>
+      </div>
+    </div>
+    <div class="card-content">
+      <div class="controls">
+        <div class="control-group">
+          <button id="atomTool" class="btn btn-primary">Atomo</button>
+          <div class="select-container">
+            <select id="atomSelect" class="select">
+              <option value="C">C</option>
+              <option value="N">N</option>
+              <option value="O">O</option>
+              <option value="H">H</option>
+              <option value="more">Più elementi...</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <button id="bondTool" class="btn btn-outline">Legame</button>
+          <div class="select-container">
+            <select id="bondSelect" class="select">
+              <option value="single">Singolo</option>
+              <option value="double">Doppio</option>
+              <option value="triple">Triplo</option>
+            </select>
+          </div>
+        </div>
+        
+        <button id="eraserTool" class="btn btn-outline">Gomma</button>
+        <button id="exportBtn" class="btn btn-outline">Esporta SMILES</button>
+        <button id="clearBtn" class="btn btn-danger">Cancella Tutto</button>
+      </div>
+      
+      <canvas id="molecularCanvas" width="840" height="500"></canvas>
+    </div>
+  </div>
+  
+  <div id="elementPicker" class="element-picker">
+    <div class="element-picker-header">
+      <h3 class="element-picker-title">Seleziona un elemento</h3>
+      <button class="close-btn" id="closeElementPicker">&times;</button>
+    </div>
+    <div class="periodic-table" id="periodicTable">
+      <!-- Gli elementi verranno generati dinamicamente -->
+    </div>
+  </div>
+
+  <script>
+    // Definizione costanti degli elementi chimici (tavola periodica completa)
+    const ELEMENTS = {
+      // Gruppo 1: Metalli alcalini
+      'H': { symbol: 'H', name: 'Idrogeno', number: 1, color: '#a0aec0', valence: 1 },
+      'Li': { symbol: 'Li', name: 'Litio', number: 3, color: '#F06292', valence: 1 },
+      'Na': { symbol: 'Na', name: 'Sodio', number: 11, color: '#F06292', valence: 1 },
+      'K': { symbol: 'K', name: 'Potassio', number: 19, color: '#F06292', valence: 1 },
+      'Rb': { symbol: 'Rb', name: 'Rubidio', number: 37, color: '#F06292', valence: 1 },
+      'Cs': { symbol: 'Cs', name: 'Cesio', number: 55, color: '#F06292', valence: 1 },
+      'Fr': { symbol: 'Fr', name: 'Francio', number: 87, color: '#F06292', valence: 1 },
+      
+      // Gruppo 2: Metalli alcalino-terrosi
+      'Be': { symbol: 'Be', name: 'Berillio', number: 4, color: '#BA68C8', valence: 2 },
+      'Mg': { symbol: 'Mg', name: 'Magnesio', number: 12, color: '#BA68C8', valence: 2 },
+      'Ca': { symbol: 'Ca', name: 'Calcio', number: 20, color: '#BA68C8', valence: 2 },
+      'Sr': { symbol: 'Sr', name: 'Stronzio', number: 38, color: '#BA68C8', valence: 2 },
+      'Ba': { symbol: 'Ba', name: 'Bario', number: 56, color: '#BA68C8', valence: 2 },
+      'Ra': { symbol: 'Ra', name: 'Radio', number: 88, color: '#BA68C8', valence: 2 },
+      
+      // Gruppo 13-18: Principali
+      'B': { symbol: 'B', name: 'Boro', number: 5, color: '#FFB74D', valence: 3 },
+      'C': { symbol: 'C', name: 'Carbonio', number: 6, color: '#4299e1', valence: 4 },
+      'N': { symbol: 'N', name: 'Azoto', number: 7, color: '#48bb78', valence: 3 },
+      'O': { symbol: 'O', name: 'Ossigeno', number: 8, color: '#f56565', valence: 2 },
+      'F': { symbol: 'F', name: 'Fluoro', number: 9, color: '#81D4FA', valence: 1 },
+      'Ne': { symbol: 'Ne', name: 'Neon', number: 10, color: '#B39DDB', valence: 0 },
+      
+      'Al': { symbol: 'Al', name: 'Alluminio', number: 13, color: '#FFB74D', valence: 3 },
+      'Si': { symbol: 'Si', name: 'Silicio', number: 14, color: '#FFB74D', valence: 4 },
+      'P': { symbol: 'P', name: 'Fosforo', number: 15, color: '#FF8A65', valence: 5 },
+      'S': { symbol: 'S', name: 'Zolfo', number: 16, color: '#FFF176', valence: 2 },
+      'Cl': { symbol: 'Cl', name: 'Cloro', number: 17, color: '#81D4FA', valence: 1 },
+      'Ar': { symbol: 'Ar', name: 'Argon', number: 18, color: '#B39DDB', valence: 0 },
+      
+      'Ga': { symbol: 'Ga', name: 'Gallio', number: 31, color: '#FFB74D', valence: 3 },
+      'Ge': { symbol: 'Ge', name: 'Germanio', number: 32, color: '#FFB74D', valence: 4 },
+      'As': { symbol: 'As', name: 'Arsenico', number: 33, color: '#FF8A65', valence: 5 },
+      'Se': { symbol: 'Se', name: 'Selenio', number: 34, color: '#FFF176', valence: 2 },
+      'Br': { symbol: 'Br', name: 'Bromo', number: 35, color: '#81D4FA', valence: 1 },
+      'Kr': { symbol: 'Kr', name: 'Kripton', number: 36, color: '#B39DDB', valence: 0 },
+      
+      'In': { symbol: 'In', name: 'Indio', number: 49, color: '#FFB74D', valence: 3 },
+      'Sn': { symbol: 'Sn', name: 'Stagno', number: 50, color: '#FFB74D', valence: 4 },
+      'Sb': { symbol: 'Sb', name: 'Antimonio', number: 51, color: '#FF8A65', valence: 5 },
+      'Te': { symbol: 'Te', name: 'Tellurio', number: 52, color: '#FFF176', valence: 2 },
+      'I': { symbol: 'I', name: 'Iodio', number: 53, color: '#81D4FA', valence: 1 },
+      'Xe': { symbol: 'Xe', name: 'Xenon', number: 54, color: '#B39DDB', valence: 0 },
+      
+      'Tl': { symbol: 'Tl', name: 'Tallio', number: 81, color: '#FFB74D', valence: 3 },
+      'Pb': { symbol: 'Pb', name: 'Piombo', number: 82, color: '#FFB74D', valence: 4 },
+      'Bi': { symbol: 'Bi', name: 'Bismuto', number: 83, color: '#FF8A65', valence: 5 },
+      'Po': { symbol: 'Po', name: 'Polonio', number: 84, color: '#FFF176', valence: 2 },
+      'At': { symbol: 'At', name: 'Astato', number: 85, color: '#81D4FA', valence: 1 },
+      'Rn': { symbol: 'Rn', name: 'Radon', number: 86, color: '#B39DDB', valence: 0 },
+      
+      // Metalli di transizione (selezionati)
+      'Sc': { symbol: 'Sc', name: 'Scandio', number: 21, color: '#64B5F6', valence: 3 },
+      'Ti': { symbol: 'Ti', name: 'Titanio', number: 22, color: '#64B5F6', valence: 4 },
+      'V': { symbol: 'V', name: 'Vanadio', number: 23, color: '#64B5F6', valence: 5 },
+      'Cr': { symbol: 'Cr', name: 'Cromo', number: 24, color: '#64B5F6', valence: 6 },
+      'Mn': { symbol: 'Mn', name: 'Manganese', number: 25, color: '#64B5F6', valence: 7 },
+      'Fe': { symbol: 'Fe', name: 'Ferro', number: 26, color: '#64B5F6', valence: 3 },
+      'Co': { symbol: 'Co', name: 'Cobalto', number: 27, color: '#64B5F6', valence: 2 },
+      'Ni': { symbol: 'Ni', name: 'Nichel', number: 28, color: '#64B5F6', valence: 2 },
+      'Cu': { symbol: 'Cu', name: 'Rame', number: 29, color: '#64B5F6', valence: 2 },
+      'Zn': { symbol: 'Zn', name: 'Zinco', number: 30, color: '#64B5F6', valence: 2 },
+      
+      'Y': { symbol: 'Y', name: 'Ittrio', number: 39, color: '#64B5F6', valence: 3 },
+      'Zr': { symbol: 'Zr', name: 'Zirconio', number: 40, color: '#64B5F6', valence: 4 },
+      'Nb': { symbol: 'Nb', name: 'Niobio', number: 41, color: '#64B5F6', valence: 5 },
+      'Mo': { symbol: 'Mo', name: 'Molibdeno', number: 42, color: '#64B5F6', valence: 6 },
+      'Tc': { symbol: 'Tc', name: 'Tecnezio', number: 43, color: '#64B5F6', valence: 7 },
+      'Ru': { symbol: 'Ru', name: 'Rutenio', number: 44, color: '#64B5F6', valence: 8 },
+      'Rh': { symbol: 'Rh', name: 'Rodio', number: 45, color: '#64B5F6', valence: 4 },
+      'Pd': { symbol: 'Pd', name: 'Palladio', number: 46, color: '#64B5F6', valence: 4 },
+      'Ag': { symbol: 'Ag', name: 'Argento', number: 47, color: '#64B5F6', valence: 1 },
+      'Cd': { symbol: 'Cd', name: 'Cadmio', number: 48, color: '#64B5F6', valence: 2 },
+      
+      // Altri elementi principali
+      'He': { symbol: 'He', name: 'Elio', number: 2, color: '#B39DDB', valence: 0 },
+      
+      // Altri gruppi e serie
+      'Hf': { symbol: 'Hf', name: 'Afnio', number: 72, color: '#64B5F6', valence: 4 },
+      'Ta': { symbol: 'Ta', name: 'Tantalio', number: 73, color: '#64B5F6', valence: 5 },
+      'W': { symbol: 'W', name: 'Tungsteno', number: 74, color: '#64B5F6', valence: 6 },
+      'Re': { symbol: 'Re', name: 'Renio', number: 75, color: '#64B5F6', valence: 7 },
+      'Os': { symbol: 'Os', name: 'Osmio', number: 76, color: '#64B5F6', valence: 8 },
+      'Ir': { symbol: 'Ir', name: 'Iridio', number: 77, color: '#64B5F6', valence: 4 },
+      'Pt': { symbol: 'Pt', name: 'Platino', number: 78, color: '#64B5F6', valence: 4 },
+      'Au': { symbol: 'Au', name: 'Oro', number: 79, color: '#64B5F6', valence: 1 },
+      'Hg': { symbol: 'Hg', name: 'Mercurio', number: 80, color: '#64B5F6', valence: 2 },
+      
+      // Lantanidi e attinidi (selezionati)
+      'La': { symbol: 'La', name: 'Lantanio', number: 57, color: '#26A69A', valence: 3 },
+      'Ce': { symbol: 'Ce', name: 'Cerio', number: 58, color: '#26A69A', valence: 3 },
+      'Th': { symbol: 'Th', name: 'Torio', number: 90, color: '#26A69A', valence: 4 },
+      'U': { symbol: 'U', name: 'Uranio', number: 92, color: '#26A69A', valence: 6 },
+    };
+
+    const BOND_TYPES = {
+      'single': { lines: 1, spacing: 0 },
+      'double': { lines: 2, spacing: 3 },
+      'triple': { lines: 3, spacing: 3 },
+    };
+
+    // Disposizione della tavola periodica
+    const PERIODIC_TABLE_LAYOUT = [
+      // Riga 1
+      {symbol: 'H', group: 1, period: 1},
+      {empty: true, span: 16},
+      {symbol: 'He', group: 18, period: 1},
+      
+      // Riga 2
+      {symbol: 'Li', group: 1, period: 2},
+      {symbol: 'Be', group: 2, period: 2},
+      {empty: true, span: 10},
+      {symbol: 'B', group: 13, period: 2},
+      {symbol: 'C', group: 14, period: 2},
+      {symbol: 'N', group: 15, period: 2},
+      {symbol: 'O', group: 16, period: 2},
+      {symbol: 'F', group: 17, period: 2},
+      {symbol: 'Ne', group: 18, period: 2},
+      
+      // Riga 3
+      {symbol: 'Na', group: 1, period: 3},
+      {symbol: 'Mg', group: 2, period: 3},
+      {empty: true, span: 10},
+      {symbol: 'Al', group: 13, period: 3},
+      {symbol: 'Si', group: 14, period: 3},
+      {symbol: 'P', group: 15, period: 3},
+      {symbol: 'S', group: 16, period: 3},
+      {symbol: 'Cl', group: 17, period: 3},
+      {symbol: 'Ar', group: 18, period: 3},
+      
+      // Riga 4
+      {symbol: 'K', group: 1, period: 4},
+      {symbol: 'Ca', group: 2, period: 4},
+      {symbol: 'Sc', group: 3, period: 4},
+      {symbol: 'Ti', group: 4, period: 4},
+      {symbol: 'V', group: 5, period: 4},
+      {symbol: 'Cr', group: 6, period: 4},
+      {symbol: 'Mn', group: 7, period: 4},
+      {symbol: 'Fe', group: 8, period: 4},
+      {symbol: 'Co', group: 9, period: 4},
+      {symbol: 'Ni', group: 10, period: 4},
+      {symbol: 'Cu', group: 11, period: 4},
+      {symbol: 'Zn', group: 12, period: 4},
+      {symbol: 'Ga', group: 13, period: 4},
+      {symbol: 'Ge', group: 14, period: 4},
+      {symbol: 'As', group: 15, period: 4},
+      {symbol: 'Se', group: 16, period: 4},
+      {symbol: 'Br', group: 17, period: 4},
+      {symbol: 'Kr', group: 18, period: 4},
+      
+      // Riga 5
+      {symbol: 'Rb', group: 1, period: 5},
+      {symbol: 'Sr', group: 2, period: 5},
+      {symbol: 'Y', group: 3, period: 5},
+      {symbol: 'Zr', group: 4, period: 5},
+      {symbol: 'Nb', group: 5, period: 5},
+      {symbol: 'Mo', group: 6, period: 5},
+      {symbol: 'Tc', group: 7, period: 5},
+      {symbol: 'Ru', group: 8, period: 5},
+      {symbol: 'Rh', group: 9, period: 5},
+      {symbol: 'Pd', group: 10, period: 5},
+      {symbol: 'Ag', group: 11, period: 5},
+      {symbol: 'Cd', group: 12, period: 5},
+      {symbol: 'In', group: 13, period: 5},
+      {symbol: 'Sn', group: 14, period: 5},
+      {symbol: 'Sb', group: 15, period: 5},
+      {symbol: 'Te', group: 16, period: 5},
+      {symbol: 'I', group: 17, period: 5},
+      {symbol: 'Xe', group: 18, period: 5},
+      
+      // Riga 6
+      {symbol: 'Cs', group: 1, period: 6},
+      {symbol: 'Ba', group: 2, period: 6},
+      {symbol: 'La', group: 3, period: 6},
+      {symbol: 'Hf', group: 4, period: 6},
+      {symbol: 'Ta', group: 5, period: 6},
+      {symbol: 'W', group: 6, period: 6},
+      {symbol: 'Re', group: 7, period: 6},
+      {symbol: 'Os', group: 8, period: 6},
+      {symbol: 'Ir', group: 9, period: 6},
+      {symbol: 'Pt', group: 10, period: 6},
+      {symbol: 'Au', group: 11, period: 6},
+      {symbol: 'Hg', group: 12, period: 6},
+      {symbol: 'Tl', group: 13, period: 6},
+      {symbol: 'Pb', group: 14, period: 6},
+      {symbol: 'Bi', group: 15, period: 6},
+      {symbol: 'Po', group: 16, period: 6},
+      {symbol: 'At', group: 17, period: 6},
+      {symbol: 'Rn', group: 18, period: 6},
+      
+      // Riga 7
+      {symbol: 'Fr', group: 1, period: 7},
+      {symbol: 'Ra', group: 2, period: 7},
+      {empty: true, span: 16}
+    ];
+
+    // Elementi DOM
+    const canvas = document.getElementById('molecularCanvas');
+    const ctx = canvas.getContext('2d');
+    const atomToolBtn = document.getElementById('atomTool');
+    const bondToolBtn = document.getElementById('bondTool');
+    const eraserToolBtn = document.getElementById('eraserTool');
+    const atomSelect = document.getElementById('atomSelect');
+    const bondSelect = document.getElementById('bondSelect');
+    const exportBtn = document.getElementById('exportBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const elementPicker = document.getElementById('elementPicker');
+    const periodicTable = document.getElementById('periodicTable');
+    const closeElementPicker = document.getElementById('closeElementPicker');
+    const gridToggle = document.getElementById('gridToggle');
+
+    // Stato dell'applicazione
+    let isDrawing = false;
+    let currentTool = 'atom';
+    let currentAtom = 'C';
+    let currentBond = 'single';
+    let lastPosition = { x: 0, y: 0 };
+    let molecules = [];
+    let selectedAtom = null;
+    let useHexGrid = false;
+    
+    // Parametri della griglia esagonale
+    const hexSize = 20; // raggio dell'esagono
+    
+    // Popola la tavola periodica
+    function populatePeriodicTable() {
+      periodicTable.innerHTML = '';
+      
+      PERIODIC_TABLE_LAYOUT.forEach(item => {
+        if (item.empty) {
+          // Spazio vuoto
+          const emptyCell = document.createElement('div');
+          emptyCell.style.gridColumn = `span ${item.span}`;
+          periodicTable.appendChild(emptyCell);
+        } else if (item.symbol && ELEMENTS[item.symbol]) {
+          // Elemento chimico
+          const element = ELEMENTS[item.symbol];
+          const elementBtn = document.createElement('button');
+          elementBtn.className = 'element-btn';
+          elementBtn.style.backgroundColor = element.color;
+          elementBtn.style.color = getLuminance(element.color) > 0.5 ? '#1a202c' : 'white';
+          
+          const symbolSpan = document.createElement('span');
+          symbolSpan.className = 'element-symbol';
+          symbolSpan.textContent = element.symbol;
+          
+          const numberSpan = document.createElement
