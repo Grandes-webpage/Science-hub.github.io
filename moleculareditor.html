@@ -265,54 +265,54 @@
 <body>
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">Editor Molecolare Avanzato</h2>
+      <h2 class="card-title">Molecular Editor</h2>
       <div class="grid-toggle">
-        <span class="grid-label">Griglia quadrata</span>
+        <span class="grid-label">Square grid</span>
         <label class="switch">
           <input type="checkbox" id="gridToggle">
           <span class="slider"></span>
         </label>
-        <span class="grid-label">Griglia esagonale</span>
+        <span class="grid-label">Hexagonal grid</span>
       </div>
     </div>
     <div class="card-content">
       <div class="controls">
         <div class="control-group">
-          <button id="atomTool" class="btn btn-primary">Atomo</button>
+          <button id="atomTool" class="btn btn-primary">Atom</button>
           <div class="select-container">
             <select id="atomSelect" class="select">
               <option value="C">C</option>
               <option value="N">N</option>
               <option value="O">O</option>
               <option value="H">H</option>
-              <option value="more">Più elementi...</option>
+              <option value="more">More elements</option>
             </select>
           </div>
         </div>
         
         <div class="control-group">
-          <button id="bondTool" class="btn btn-outline">Legame</button>
+          <button id="bondTool" class="btn btn-outline">bond</button>
           <div class="select-container">
             <select id="bondSelect" class="select">
-              <option value="single">Singolo</option>
-              <option value="double">Doppio</option>
-              <option value="triple">Triplo</option>
+              <option value="single">Singol</option>
+              <option value="double">Double</option>
+              <option value="triple">Triple</option>
             </select>
           </div>
         </div>
         
-        <button id="eraserTool" class="btn btn-outline">Gomma</button>
-        <button id="exportBtn" class="btn btn-outline">Esporta SMILES</button>
-        <button id="clearBtn" class="btn btn-danger">Cancella Tutto</button>
+        <button id="eraserTool" class="btn btn-outline">Eraser</button>
+        <button id="exportBtn" class="btn btn-outline">export SMILES</button>
+        <button id="clearBtn" class="btn btn-danger">delete everything</button>
       </div>
       
-      <canvas id="molecularCanvas" width="840" height="500"></canvas>
+      <canvas id="molecularCanvas" width="1000" height="500"></canvas>
     </div>
   </div>
   
   <div id="elementPicker" class="element-picker">
     <div class="element-picker-header">
-      <h3 class="element-picker-title">Seleziona un elemento</h3>
+      <h3 class="element-picker-title">Select an element</h3>
       <button class="close-btn" id="closeElementPicker">&times;</button>
     </div>
     <div class="periodic-table" id="periodicTable">
